@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Lab | المحطة 5: استخدمه بأمان</title>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+
+    <section id="sf">
+  <h2>محطة: استخدمه بأمان</h2>
+  <div id="sf-head">
+    <div id="sf-bot">🤖</div>
+    <div>
+      اسأل نوفا عن الأمان الرقمي: الذكاء الاصطناعي، السوشيال ميديا، والحماية من القرصنة.
+      <div>
+        <button id="sf-snd" class="sf-mini">🔊 الصوت: شغال</button>
+        <button id="sf-stop" class="sf-mini">⏹️ وقّف الصوت</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="sf-rules">
+    <b>قواعد سريعة:</b>
+    <ol>
+      <li>مفيش كلمات سر ولا بيانات شخصية في أي شات.</li>
+      <li>كلمة سر قوية ومختلفة لكل حساب، وفعّل التحقق بخطوتين.</li>
+      <li>متدوسش على روابط غريبة، وراجع عنوان الموقع كويس.</li>
+      <li>راجع أي معلومة مهمة من مصدر موثوق قبل ما تصدقها.</li>
+    </ol>
+  </div>
+
+  <div id="sf-chips">
+    <button class="sf-chip">إيه اللي أعمله عشان حسابي ميتهكرش؟</button>
+    <button class="sf-chip">إزاي أعرف إن الرابط مزيف؟</button>
+    <button class="sf-chip">إيه اللي ممنوع أكتبه للذكاء الاصطناعي؟</button>
+    <button class="sf-chip">إزاي أحمي حساباتي على السوشيال ميديا؟</button>
+    <button class="sf-chip">حد بيهددني على النت، أعمل إيه؟</button>
+  </div>
+
+  <div id="sf-log"></div>
+
+  <div id="sf-input">
+    <textarea id="sf-q" rows="2" placeholder="اكتب سؤالك هنا..."></textarea>
+    <div class="sf-row">
+      <button id="sf-mic" class="sf-mini">🎤 اتكلم</button>
+      <button id="sf-send">إرسال ✉️</button>
+    </div>
+  </div>
+</section>
+<style>
+#sf{max-width:900px;margin:30px auto;padding:20px;color:#fff;direction:rtl;text-align:center;line-height:1.8}
+#sf h2{font-size:34px;margin:0 0 6px}
+#sf h2::before{content:"🛡️";display:block;font-size:80px;line-height:1.2}
+#sf-head{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:17px;color:#7dd3fc}
+#sf-bot{font-size:30px;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#3b82f6,#8b5cf6)}
+#sf-bot.talk{animation:sfp .7s infinite alternate}
+@keyframes sfp{from{box-shadow:0 0 0 0 #8b5cf6aa}to{box-shadow:0 0 0 14px #8b5cf600}}
+#sf-rules{background:#16224a;border-radius:10px;padding:10px 14px;max-width:640px;margin:16px auto;text-align:right;font-size:14px}
+#sf-rules ol{margin:6px 0 0;padding-right:20px}
+#sf-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:12px auto;max-width:720px}
+.sf-chip{background:#1e2a55!important;border:1px solid #6d28d9!important;border-radius:20px!important;font-size:13px!important;padding:4px 12px!important}
+#sf-log{max-width:700px;margin:10px auto;display:flex;flex-direction:column;gap:8px;max-height:380px;overflow-y:auto;text-align:right}
+.sf-m{padding:10px 14px;border-radius:12px;max-width:90%;font-size:15px;white-space:pre-wrap}
+.sf-m.bot{background:#1e2a55;align-self:flex-start}
+.sf-m.me{background:#3b82f6;align-self:flex-end}
+#sf-input{max-width:700px;margin:0 auto;text-align:right}
+#sf-q{width:100%;box-sizing:border-box;padding:10px;border-radius:10px;border:1px solid #3b82f6;background:#0f1d40;color:#fff;font-size:16px;font-family:inherit}
+.sf-row{display:flex;gap:10px;margin-top:8px}
+#sf button{padding:10px 14px;border:none;border-radius:10px;background:#3b82f6;color:#fff;font-size:15px;cursor:pointer;font-family:inherit}
+#sf-send{flex:1;background:#8b5cf6}
+.sf-mini{background:#1e2a55!important;font-size:13px!important;padding:6px 10px!important;margin-top:6px}
+#sf button:disabled{opacity:.4;cursor:not-allowed}
+</style>
+<script>
+(function () {
+  var SYSTEM = "أنت نوفا، مدربة أمان رقمي ودودة لطلاب الثانوية في مختبر الذكاء. " +
+    "موضوعك: الاستخدام الآمن للذكاء الاصطناعي، وحماية الحسابات على السوشيال ميديا، والوقاية من القرصنة والتصيد والاحتيال، وحماية الخصوصية. " +
+    "جاوبي بالعامية المصرية المبسطة بخطوات عملية قصيرة (حد أقصى 5 نقاط أو جمل)، وبدون رموز تنسيق مثل النجوم أو علامة #. " +
+    "اشرحي كيف يحمي الطالب نفسه فقط. لو طلب منك اختراق حساب شخص آخر أو أي شيء ضار، ارفضي بلطف ووجهيه لأسلوب آمن. " +
+    "لو ذكر الطالب أنه يتعرض لتهديد أو ابتزاز أو تنمر، طمئنيه، وانصحيه بعدم الرد على المبتز، وحفظ الأدلة بلقطات شاشة، " +
+    "والإبلاغ عن الحساب في المنصة، وإخبار شخص كبير يثق به كأحد الوالدين أو معلم أو جهة مختصة في بلده. " +
+    "لو مش متأكدة من معلومة قولي ذلك وانصحي بمراجعة مصدر موثوق.";
+
+  var $ = function (id) { return document.getElementById(id); };
+  var history = [];
+  var sound = true, busy = false, rec = null;
+
+  function say(text) {
+    if (!sound) { return; }
+    if (!("speechSynthesis" in window)) { return; }
+    speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = "ar-SA";
+    u.rate = 0.95;
+    u.onstart = function () { $("sf-bot").classList.add("talk"); };
+    u.onend = function () { $("sf-bot").classList.remove("talk"); };
+    u.onerror = function () { $("sf-bot").classList.remove("talk"); };
+    speechSynthesis.speak(u);
+  }
+  function add(text, cls) {
+    var d = document.createElement("div");
+    d.className = "sf-m " + cls;
+    d.textContent = text;
+    $("sf-log").appendChild(d);
+    $("sf-log").scrollTop = $("sf-log").scrollHeight;
+    return d;
+  }
+
+  var failed = false;
+
+  async function ask(q) {
+    failed = false;
+    var hasKey = (typeof GEMINI_KEY !== "undefined") && GEMINI_KEY && GEMINI_KEY.indexOf("ضع_المفتاح") < 0;
+    if (!hasKey) { failed = true; return "لازم تحط مفتاح Gemini الحقيقي في ملف nova-chat.js الأول."; }
+    history.push({ role: "user", parts: [{ text: q }] });
+    if (history.length > 12) { history = history.slice(history.length - 12); }
+    var url = "https://generativelanguage.googleapis.com/v1beta/models/" + GEMINI_MODEL + ":generateContent?key=" + GEMINI_KEY;
+    var body = JSON.stringify({
+      systemInstruction: { parts: [{ text: SYSTEM }] },
+      contents: history,
+      generationConfig: { maxOutputTokens: 500 }
+    });
+    try {
+      var res;
+      for (var k = 0; k < 3; k++) {
+        res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: body });
+        if (res.ok) { break; }
+        if (res.status !== 503 && res.status !== 429) { break; }
+        await new Promise(function (r) { setTimeout(r, 1000); });
+      }
+      var data = await res.json();
+      if (!res.ok) {
+        failed = true;
+        history.pop();
+        if ([503, 429].indexOf(res.status) >= 0) { return "الموديل مشغول دلوقتي، جرّب بعد شوية."; }
+        return "حصل خطأ: " + (data.error ? data.error.message : res.status);
+      }
+      var parts = (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) ? data.candidates[0].content.parts : [];
+      var text = parts.map(function (p) { return p.text ? p.text : ""; }).join("");
+      if (!text) { failed = true; history.pop(); return "ما قدرتش أرد دلوقتي، جرّب تسأل بطريقة تانية."; }
+      history.push({ role: "model", parts: [{ text: text }] });
+      return text;
+    } catch (e) {
+      console.error(e);
+      failed = true;
+      history.pop();
+      return "في مشكلة في الاتصال بالإنترنت.";
+    }
+  }
+  async function send(text) {
+    var q = text ? text : $("sf-q").value.trim();
+    if (!q) { return; }
+    if (busy) { return; }
+    busy = true;
+    $("sf-send").disabled = true;
+    $("sf-q").value = "";
+    add(q, "me");
+    var wait = add("نوفا بتفكر...", "bot");
+    var reply = await ask(q);
+    wait.textContent = reply;
+    if (!failed) { say(reply); }
+    busy = false;
+    $("sf-send").disabled = false;
+  }
+
+  var SR = window.SpeechRecognition ? window.SpeechRecognition : window.webkitSpeechRecognition;
+  if (!SR) {
+    $("sf-mic").hidden = true;
+  } else {
+    $("sf-mic").onclick = function () {
+      if (rec) { rec.stop(); return; }
+      if ("speechSynthesis" in window) { speechSynthesis.cancel(); }
+      rec = new SR();
+      rec.lang = "ar-EG";
+      rec.interimResults = false;
+      $("sf-mic").textContent = "⏹️ بسمعك...";
+      rec.onresult = function (e) {
+        $("sf-q").value = e.results[0][0].transcript;
+        send();
+      };
+      rec.onend = function () { rec = null; $("sf-mic").textContent = "🎤 اتكلم"; };
+      rec.onerror = function () { rec = null; $("sf-mic").textContent = "🎤 اتكلم"; };
+      rec.start();
+    };
+  }
+
+  $("sf-send").onclick = function () { send(); };
+  $("sf-q").addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+  });
+  document.querySelectorAll("#sf .sf-chip").forEach(function (b) {
+    b.onclick = function () { send(b.textContent); };
+  });
+  $("sf-snd").onclick = function () {
+    sound = !sound;
+    if (!sound && "speechSynthesis" in window) { speechSynthesis.cancel(); }
+    $("sf-snd").textContent = "🔊 الصوت: " + (sound ? "شغال" : "مقفول");
+  };
+  $("sf-stop").onclick = function () {
+    if ("speechSynthesis" in window) { speechSynthesis.cancel(); }
+    $("sf-bot").classList.remove("talk");
+  };
+
+  add("أهلاً! أنا نوفا 🤖. اسألني عن الأمان على الإنترنت، أو دوس على سؤال من اللي فوق.", "bot");
+})();
+</script>
+        <footer>
+            AI LAB | Explore. Learn. Think.
+        </footer>
+
+    </main>
+    <script src="./js/nav.js"></script>
+<script src="./js/nova-chat.js"></script>
+</body>
+</html>

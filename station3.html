@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Lab | المحطة 3: اكتشف التزييف</title>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+
+    <section id="pg">
+  <h2>محطة: مولّد البرومبت</h2>
+  <p class="pg-sub">قول لنوفا عايز تعمل إيه، وهي تكتبلك برومبت كامل تنسخه وتحطه في ChatGPT.</p>
+
+  <div id="pg-how">
+    <b>إزاي تستخدمها؟</b>
+    <ol>
+      <li>اكتب اللي عايزه (تعديل صورة، تلخيص، شرح كود، خطة مذاكرة...).</li>
+      <li>دوس «اكتبلي البرومبت»، وبعدين «نسخ».</li>
+      <li>افتح ChatGPT، ارفق الصورة أو الملف لو محتاج، والصق البرومبت.</li>
+    </ol>
+  </div>
+
+  <div id="pg-chips">
+    <button class="pg-chip">عايز برومبت لتعديل وتوضيح صورة قديمة</button>
+    <button class="pg-chip">عايز برومبت يلخصلي محاضرة PDF في نقاط</button>
+    <button class="pg-chip">عايز برومبت يشرحلي كود Python سطر بسطر</button>
+    <button class="pg-chip">عايز برومبت يعملي خطة مذاكرة لمدة أسبوع</button>
+  </div>
+
+  <div id="pg-in">
+    <textarea id="pg-want" rows="3" placeholder="اكتب اللي عايز تعمله... مثلاً: عايز أعدل صورة وأخلي ألوانها أوضح"></textarea>
+    <button id="pg-make">✨ اكتبلي البرومبت</button>
+  </div>
+
+  <div id="pg-out" hidden>
+    <div class="pg-label">📋 البرومبت الجاهز:</div>
+    <textarea id="pg-result" rows="12" readonly></textarea>
+    <div class="pg-btns">
+      <button id="pg-copy">📋 نسخ</button>
+      <a id="pg-gpt" href="https://chatgpt.com" target="_blank" rel="noopener">🚀 افتح ChatGPT</a>
+    </div>
+    <p class="pg-note">لو برومبتك محتاج صورة أو ملف، ارفقه في ChatGPT مع البرومبت.</p>
+    <div class="pg-label">عايز تعدل عليه؟ اكتب لنوفا:</div>
+    <textarea id="pg-edit" rows="2" placeholder="مثلاً: خليه أقصر / اطلب الرد بالعربي / زوّد أمثلة"></textarea>
+    <button id="pg-edit-btn">🔧 عدّل البرومبت</button>
+  </div>
+</section>
+<style>
+#pg{max-width:900px;margin:30px auto;padding:20px;color:#fff;direction:rtl;text-align:center;line-height:1.8}
+#pg h2{font-size:34px;margin:0 0 6px}
+#pg h2::before{content:"✨";display:block;font-size:80px;line-height:1.2}
+.pg-sub{color:#7dd3fc;font-size:17px;margin-bottom:16px}
+#pg-how{background:#16224a;border-radius:10px;padding:10px 14px;max-width:640px;margin:16px auto;text-align:right;font-size:14px}
+#pg-how ol{margin:6px 0 0;padding-right:20px}
+#pg-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:12px auto;max-width:700px}
+.pg-chip{background:#1e2a55!important;border:1px solid #6d28d9!important;border-radius:20px!important;font-size:13px!important;padding:4px 12px!important}
+#pg-in,#pg-out{max-width:700px;margin:12px auto;text-align:right}
+.pg-label{font-weight:bold;color:#93c5fd;margin:10px 0 4px}
+#pg textarea{width:100%;box-sizing:border-box;padding:10px;border-radius:10px;border:1px solid #3b82f6;background:#0f1d40;color:#fff;font-size:16px;font-family:inherit;margin-top:6px}
+#pg-result{font-size:14px;line-height:1.7}
+#pg button,#pg-gpt{padding:10px 14px;border:none;border-radius:10px;background:#3b82f6;color:#fff;font-size:15px;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block;text-align:center}
+#pg-make,#pg-edit-btn{width:100%;margin-top:8px;background:#8b5cf6}
+.pg-btns{display:flex;gap:10px;margin-top:8px}
+.pg-btns button,.pg-btns a{flex:1}
+#pg-gpt{background:#059669}
+.pg-note{font-size:13px;color:#fcd34d}
+#pg button:disabled{opacity:.4;cursor:not-allowed}
+</style>
+<script>
+(function () {
+  var SYSTEM = "أنت خبير في كتابة البرومبتات لأدوات الذكاء الاصطناعي مثل ChatGPT. " +
+    "مهمتك: لما يخبرك الطالب بما يريد فعله، تكتب له برومبت كامل ومنظم وجاهز للنسخ واللصق في ChatGPT. " +
+    "يجب أن يتضمن البرومبت: الدور المطلوب من الذكاء الاصطناعي، المهمة بالتفصيل، السياق والمعلومات المهمة، " +
+    "الشروط والقيود، وشكل المخرجات المطلوب. ضع بين أقواس مربعة [ ] أي معلومة ينقصها الطالب ليملأها بنفسه. " +
+    "لو المهمة تحتاج صورة أو ملف، اكتب في البرومبت جملة مثل: (أرفقت لك الصورة/الملف مع هذه الرسالة). " +
+    "اكتب البرومبت بنفس لغة الطالب. أرجع نص البرومبت فقط، بدون مقدمات أو شرح أو عناوين جانبية، وبدون رموز تنسيق مثل النجوم أو علامات الكود.";
+
+  var $ = function (id) { return document.getElementById(id); };
+  var history = [];
+  var busy = false;
+  var failed = false;
+
+  async function ask() {
+    failed = false;
+    var hasKey = (typeof GEMINI_KEY !== "undefined") && GEMINI_KEY && GEMINI_KEY.indexOf("ضع_المفتاح") < 0;
+    if (!hasKey) { failed = true; return "لازم تحط مفتاح Gemini الحقيقي في ملف nova-chat.js الأول."; }
+    var url = "https://generativelanguage.googleapis.com/v1beta/models/" + GEMINI_MODEL + ":generateContent?key=" + GEMINI_KEY;
+    var body = JSON.stringify({
+      systemInstruction: { parts: [{ text: SYSTEM }] },
+      contents: history,
+      generationConfig: { maxOutputTokens: 900 }
+    });
+    try {
+      var res;
+      for (var k = 0; k < 3; k++) {
+        res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: body });
+        if (res.ok) { break; }
+        if (res.status !== 503 && res.status !== 429) { break; }
+        await new Promise(function (r) { setTimeout(r, 1000); });
+      }
+      var data = await res.json();
+      if (!res.ok) {
+        failed = true;
+        if ([503, 429].indexOf(res.status) >= 0) { return "الموديل مشغول دلوقتي، جرّب بعد شوية."; }
+        return "حصل خطأ: " + (data.error ? data.error.message : res.status);
+      }
+      var parts = (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) ? data.candidates[0].content.parts : [];
+      var text = parts.map(function (p) { return p.text ? p.text : ""; }).join("");
+      if (!text) { failed = true; return "ما قدرتش أكتب البرومبت دلوقتي، جرّب تاني."; }
+      return text;
+    } catch (e) {
+      console.error(e);
+      failed = true;
+      return "في مشكلة في الاتصال بالإنترنت.";
+    }
+  }
+  async function run(userText) {
+    if (busy) { return; }
+    busy = true;
+    $("pg-make").disabled = true;
+    $("pg-edit-btn").disabled = true;
+    $("pg-out").hidden = false;
+    $("pg-result").value = "نوفا بتكتب البرومبت...";
+    history.push({ role: "user", parts: [{ text: userText }] });
+    var reply = await ask();
+    if (failed) {
+      history.pop();
+    } else {
+      history.push({ role: "model", parts: [{ text: reply }] });
+    }
+    $("pg-result").value = reply;
+    busy = false;
+    $("pg-make").disabled = false;
+    $("pg-edit-btn").disabled = false;
+  }
+
+  $("pg-make").onclick = function () {
+    var w = $("pg-want").value.trim();
+    if (!w) { return; }
+    history = [];
+    run("أنا عايز: " + w);
+  };
+
+  $("pg-edit-btn").onclick = function () {
+    var e = $("pg-edit").value.trim();
+    if (!e) { return; }
+    $("pg-edit").value = "";
+    run("عدّل البرومبت السابق بالشكل ده: " + e + ". أرجع البرومبت المعدّل كاملاً فقط.");
+  };
+
+  $("pg-copy").onclick = function () {
+    var box = $("pg-result");
+    var txt = box.value;
+    function done() { $("pg-copy").textContent = "✅ اتنسخ!"; setTimeout(function () { $("pg-copy").textContent = "📋 نسخ"; }, 1800); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(done);
+    } else {
+      box.select();
+      document.execCommand("copy");
+      done();
+    }
+  };
+
+  document.querySelectorAll("#pg .pg-chip").forEach(function (b) {
+    b.onclick = function () { $("pg-want").value = b.textContent; };
+  });
+})();
+</script>
+        <footer>
+            AI LAB | Explore. Learn. Think.
+        </footer>
+
+    </main>
+    <script src="./js/nav.js"></script>
+<script src="./js/nova-chat.js"></script>
+</body>
+</html>

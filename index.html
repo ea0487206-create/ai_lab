@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Lab | مختبر الذكاء</title>
+<style>
+  html, body { margin: 0; min-height: 100vh; }
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    color: #fff; text-align: center; overflow-x: hidden;
+    background:
+      radial-gradient(circle at 20% 20%, #1e3a8a55 0, transparent 45%),
+      radial-gradient(circle at 80% 70%, #6d28d955 0, transparent 45%),
+      linear-gradient(180deg, #050b1f 0%, #0a1128 50%, #0f1d40 100%);
+    background-attachment: fixed;
+  }
+  #stars { position: fixed; inset: 0; pointer-events: none; }
+  .star { position: absolute; width: 2px; height: 2px; background: #fff; border-radius: 50%; animation: tw 3s infinite; }
+  @keyframes tw { 0%, 100% { opacity: .15; } 50% { opacity: .9; } }
+
+  .wrap { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 12px; }
+
+  /* الحلقة + الروبوت */
+  #hero { position: relative; width: min(80vw, 420px); aspect-ratio: 1; cursor: pointer; transition: transform .3s; }
+  #hero:hover { transform: scale(1.04); }
+  #hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #robot {
+    position: absolute; inset: 16%;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transform: scale(.6);
+    animation: botIn 1.3s ease-out 2s forwards;
+  }
+  #robot .na { width: 100% !important; height: 100% !important; }
+  @keyframes botIn { to { opacity: 1; transform: scale(1); } }
+
+  h1 { font-size: clamp(38px, 9vw, 54px); margin: 8px 0 0; letter-spacing: 3px;
+       background: linear-gradient(90deg, #fff, #ffd37a); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .sub { color: #7dd3fc; font-size: 20px; margin: 6px 0 4px; }
+  .tag { color: #a5b4fc; letter-spacing: 4px; font-size: 14px; margin-bottom: 24px; }
+  #enter {
+    display: inline-block; padding: 14px 44px; font-size: 22px; font-weight: bold;
+    color: #0a1128; text-decoration: none; border-radius: 40px;
+    background: linear-gradient(90deg, #67e8f9, #a5b4fc);
+    transition: transform .2s, box-shadow .2s;
+  }
+  #enter:hover { transform: scale(1.06); box-shadow: 0 0 38px #ffa62bcc; }
+  .hi { color: #ffd37a; margin-top: 18px; min-height: 28px; font-size: 18px; }
+  #steps { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; max-width: 640px; margin-top: 14px; }
+  #steps span { background: #16224a; border: 1px solid #3b82f6; border-radius: 20px; padding: 6px 14px; font-size: 14px; }
+</style>
+</head>
+<body>
+  <div id="stars"></div>
+
+  <div class="wrap">
+    <div id="hero" title="اضغطوا للدخول إلى المختبر">
+      <canvas id="portal"></canvas>
+      <div id="robot"></div>
+    </div>
+
+    <h1>AI LAB</h1>
+    <div class="sub">مختبر الذكاء</div>
+    <div class="tag">EXPLORE . LEARN . THINK</div>
+    <a id="enter" href="home.html">اضغط للدخول إلى المختبر 🚀</a>
+    <div class="hi" id="hi"></div>
+    <div id="steps">
+      
+    
+  </div>
+
+  <script src="./js/nova-avatar.js"></script>
+  <script>
+    // الدخول للمختبر
+    var hero = document.getElementById("hero");
+    hero.onclick = function () { window.location.href = "home.html"; };
+
+    // النجوم
+    var box = document.getElementById("stars");
+    for (var i = 0; i < 70; i++) {
+      var d = document.createElement("div");
+      d.className = "star";
+      d.style.left = (Math.random() * 100) + "%";
+      d.style.top = (Math.random() * 100) + "%";
+      d.style.animationDelay = (Math.random() * 3) + "s";
+      box.appendChild(d);
+    }
+
+    // الروبوت
+    document.getElementById("robot").innerHTML = window.novaAvatar(300);
+    // حلقة النار والشرار
+    (function () {
+      var cv = document.getElementById("portal"), c = cv.getContext("2d");
+      var S = (cv.width = cv.height = 600), R = 175, P = [];
+      function spawn() {
+        var a = Math.random() * 6.283, r = R + (Math.random() - 0.5) * 16, s = 0.4 + Math.random() * 1.8;
+        P.push({
+          x: S / 2 + Math.cos(a) * r, y: S / 2 + Math.sin(a) * r,
+          vx: -Math.sin(a) * s * 0.9 + Math.cos(a) * s * 0.7,
+          vy: Math.cos(a) * s * 0.9 + Math.sin(a) * s * 0.7,
+          l: 1, d: 0.008 + Math.random() * 0.02, w: 0.6 + Math.random() * 1.6
+        });
+      }
+      function frame() {
+        c.clearRect(0, 0, S, S);
+        c.globalCompositeOperation = "lighter";
+        c.shadowBlur = 35; c.shadowColor = "#ff9a1f";
+        c.strokeStyle = "rgba(255,190,90,.55)"; c.lineWidth = 7;
+        c.beginPath(); c.arc(S / 2, S / 2, R, 0, 6.283); c.stroke();
+        c.shadowBlur = 0;
+        for (var i = 0; i < 14; i++) spawn();
+        for (var j = P.length - 1; j >= 0; j--) {
+          var p = P[j];
+          p.x += p.vx; p.y += p.vy; p.vy += 0.01; p.l -= p.d;
+          if (p.l <= 0) { P.splice(j, 1); continue; }
+          c.strokeStyle = "rgba(255," + ((150 + 90 * p.l) | 0) + ",60," + p.l + ")";
+          c.lineWidth = p.w;
+          c.beginPath(); c.moveTo(p.x, p.y); c.lineTo(p.x - p.vx * 3, p.y - p.vy * 3); c.stroke();
+        }
+        requestAnimationFrame(frame);
+      }
+      frame();
+    })();
+
+    // رسالة نوفا بتتكتب
+    var msg = "أهلاً! أنا نوفا، مساعدك في مختبر الذكاء 🤖";
+    var out = document.getElementById("hi"), n = 0;
+    var t = setInterval(function () {
+      out.textContent = msg.slice(0, ++n);
+      if (n >= msg.length) clearInterval(t);
+    }, 60);
+  </script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Lab | المحطة 4: تحدي الذكاء الاصطناعي</title>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+
+    <section id="ch">
+  <h2>محطة: AI Challenge</h2>
+  <p class="ch-sub">أسئلة في الحاسب الآلي، وكل ما تجاوب صح يجيلك سؤال أصعب. عندك 3 قلوب، فركّز!</p>
+
+  <div id="ch-bar"></div>
+  <div id="ch-stats">
+    <span>المستوى: <b id="ch-lv">1</b> / 10</span>
+    <span id="ch-hearts"></span>
+    <span>النقاط: <b id="ch-pts">0</b></span>
+  </div>
+
+  <div id="ch-game">
+    <div id="ch-q"></div>
+    <div id="ch-opts"></div>
+    <div id="ch-fb" hidden></div>
+    <button id="ch-next" hidden>التالي ⬅️</button>
+  </div>
+
+  <div id="ch-end" hidden>
+    <div id="ch-title"></div>
+    <p id="ch-final"></p>
+    <p id="ch-best"></p>
+    <button id="ch-again">🔄 العب من جديد</button>
+  </div>
+</section>
+
+<style>
+#ch{max-width:900px;margin:30px auto;padding:20px;color:#fff;direction:rtl;text-align:center;line-height:1.8}
+#ch h2{font-size:34px;margin:0 0 6px}
+#ch h2::before{content:"🏆";display:block;font-size:80px;line-height:1.2}
+.ch-sub{color:#7dd3fc;font-size:17px;margin-bottom:12px}
+#ch-bar{display:flex;gap:4px;max-width:700px;margin:12px auto}
+.ch-seg{flex:1;height:10px;border-radius:6px;background:#1e2a55}
+.ch-seg.done{background:#10b981}
+.ch-seg.now{background:linear-gradient(90deg,#3b82f6,#8b5cf6)}
+#ch-stats{display:flex;justify-content:space-between;max-width:700px;margin:6px auto 14px;font-size:15px}
+#ch-game,#ch-end{max-width:700px;margin:0 auto;text-align:right}
+#ch-q{background:#1e2a55;border-radius:12px;padding:16px;font-size:18px;min-height:50px;white-space:pre-wrap}
+#ch-opts{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+#ch button{padding:11px 14px;border:none;border-radius:10px;background:#3b82f6;color:#fff;font-size:16px;cursor:pointer;font-family:inherit;text-align:right}
+#ch button.right{background:#059669}
+#ch button.wrong{background:#dc2626}
+#ch button:disabled{cursor:default;opacity:.92}
+#ch-fb{margin-top:12px;padding:12px;border-radius:10px;background:#16224a;font-size:15px}
+#ch-fb.good{border-right:4px solid #10b981}
+#ch-fb.bad{border-right:4px solid #ef4444}
+#ch-next,#ch-again{width:100%;margin-top:12px;background:#8b5cf6!important;text-align:center!important}
+#ch-title{font-size:28px;font-weight:bold;text-align:center;margin:10px 0}
+#ch-final,#ch-best{text-align:center;font-size:16px}
+</style>
+<script>
+(function () {
+  var LEVELS = [
+    [
+      { q: "أي مما يلي من وحدات الإدخال؟", o: ["لوحة المفاتيح", "الطابعة", "السماعات", "الشاشة"], why: "لوحة المفاتيح تُدخل البيانات للحاسوب، أما الباقي فوحدات إخراج." },
+      { q: "ما الجزء المسمى العقل المفكر للحاسوب؟", o: ["المعالج (CPU)", "الذاكرة العشوائية", "القرص الصلب", "الماوس"], why: "المعالج ينفذ التعليمات ويعالج البيانات." },
+      { q: "أي مما يلي يُعد من البرمجيات (Software)؟", o: ["نظام التشغيل", "الفأرة", "الشاشة", "اللوحة الأم"], why: "البرمجيات هي البرامج، أما الباقي فمكونات مادية." }
+    ],
+    [
+      { q: "ماذا يعني اختصار RAM؟", o: ["Random Access Memory", "Read Only Memory", "Rapid Action Module", "Real Account Memory"], why: "RAM هي الذاكرة العشوائية، وهي ذاكرة مؤقتة تعمل أثناء تشغيل الجهاز." },
+      { q: "أي مما يلي نظام تشغيل؟", o: ["Windows", "Google Chrome", "Microsoft Word", "Photoshop"], why: "Windows نظام تشغيل، والباقي برامج تطبيقية." },
+      { q: "ما أصغر وحدة بين الوحدات التالية؟", o: ["البايت (Byte)", "الكيلوبايت", "الميجابايت", "الجيجابايت"], why: "الكيلوبايت = 1024 بايت، والبقية أكبر." }
+    ],
+    [
+      { q: "كم بت (bit) في البايت الواحد؟", o: ["8", "4", "16", "10"], why: "كل بايت يتكون من 8 بت." },
+      { q: "أي ذاكرة مؤقتة وتفقد بياناتها عند إيقاف التشغيل؟", o: ["RAM", "ROM", "HDD", "SSD"], why: "RAM ذاكرة متطايرة، والباقي وسائط تخزين دائمة." },
+      { q: "ما الامتداد الأشهر لملفات صفحات الويب؟", o: [".html", ".docx", ".mp3", ".exe"], why: "ملفات صفحات الويب تنتهي غالباً بـ html." }
+    ],
+    [
+      { q: "ما النظام العددي الذي يعمل به الحاسوب داخلياً؟", o: ["الثنائي (Binary)", "العشري", "الروماني", "الأبجدي"], why: "الحاسوب يعتمد على 0 و1 لأنه يتعامل مع إشارات كهربائية." },
+      { q: "ما قيمة الرقم الثنائي 101 بالنظام العشري؟", o: ["5", "3", "6", "7"], why: "101 = 4 + 0 + 1 = 5." },
+      { q: "ما الفرق الأساسي بين SSD وHDD؟", o: ["SSD بلا أجزاء متحركة وأسرع غالباً", "HDD أسرع دائماً", "SSD ذاكرة مؤقتة", "لا فرق بينهما"], why: "SSD يعتمد على رقاقات إلكترونية، بينما HDD فيه أقراص دوارة." }
+    ],
+    [
+      { q: "ما وظيفة بروتوكول HTTP؟", o: ["نقل صفحات الويب بين الخادم والمتصفح", "ضغط الملفات", "حماية الجهاز من الفيروسات", "تحويل الصوت إلى نص"], why: "HTTP هو البروتوكول الذي يُستخدم لطلب وتبادل صفحات الويب." },
+      { q: "ما الخوارزمية (Algorithm)؟", o: ["خطوات منظمة لحل مشكلة", "نوع من الكابلات", "لغة برمجة", "برنامج حماية"], why: "الخوارزمية سلسلة خطوات واضحة تؤدي إلى حل مشكلة." },
+      { q: "ما الرقم الثنائي الذي يساوي 6 بالعشري؟", o: ["110", "101", "011", "111"], why: "6 = 4 + 2 فيكون 110." }
+    ],
+    [
+      { q: "ما وظيفة عنوان IP؟", o: ["تحديد هوية الجهاز على الشبكة", "تسريع المعالج", "تخزين الملفات", "تشفير كلمات السر"], why: "IP يميز كل جهاز على الشبكة لتتم مراسلته." },
+      { q: "أي لغة تُستخدم لتنسيق وألوان صفحة الويب؟", o: ["CSS", "SQL", "Python", "C++"], why: "CSS مسؤولة عن الشكل والتنسيق، بينما HTML عن الهيكل." },
+      { q: "ما الحلقة التكرارية (Loop) في البرمجة؟", o: ["تنفيذ أمر عدة مرات حتى يتحقق شرط", "حذف المتغيرات", "إيقاف البرنامج", "تشفير البيانات"], why: "الحلقات تكرر تنفيذ جزء من الكود بدل كتابته مرات كثيرة." }
+    ],
+    [
+      { q: "ما ناتج هذا الكود في بايثون؟  x = 5  ثم  x = x + 3  ثم  print(x)", o: ["8", "5", "53", "خطأ"], why: "x تصبح 5 ثم 5 + 3 = 8." },
+      { q: "ما وظيفة جدار الحماية (Firewall)؟", o: ["مراقبة حركة الشبكة والسماح أو المنع بحسب قواعد", "تسريع الإنترنت", "تبريد المعالج", "تخزين الملفات"], why: "الجدار الناري يفلتر الاتصالات الداخلة والخارجة." },
+      { q: "أي أمر في SQL يُستخدم لاسترجاع بيانات من جدول؟", o: ["SELECT", "INSERT", "DELETE", "CREATE"], why: "SELECT لقراءة البيانات، وINSERT للإضافة، وDELETE للحذف." }
+    ],
+    [
+      { q: "ما تمثيل الرقم العشري 13 بالنظام الثنائي؟", o: ["1101", "1011", "1110", "1001"], why: "13 = 8 + 4 + 1 فيكون 1101." },
+      { q: "ما معنى Overfitting في تعلم الآلة؟", o: ["النموذج يحفظ بيانات التدريب ويفشل مع بيانات جديدة", "النموذج يتدرب بسرعة كبيرة", "النموذج لا يتعلم شيئاً", "نقص في سعة التخزين"], why: "المشكلة أن النموذج لا يعمم ما تعلمه على بيانات جديدة." },
+      { q: "ما وظيفة نظام DNS؟", o: ["ترجمة أسماء المواقع إلى عناوين IP", "تشفير الرسائل", "ضغط الصور", "حماية الأجهزة من الفيروسات"], why: "DNS يحول اسم الموقع إلى عنوان IP يفهمه الحاسوب." }
+    ],
+    [
+      { q: "ما تعقيد البحث الثنائي (Binary Search) في قائمة مرتبة؟", o: ["O(log n)", "O(n)", "O(n²)", "O(1)"], why: "في كل خطوة يُلغى نصف العناصر تقريباً، فيكون لوغاريتمياً." },
+      { q: "ما الفرق بين التعلم الخاضع للإشراف وغير الخاضع؟", o: ["الأول بيانات مسمّاة والثاني بيانات بدون تسميات", "الأول أسرع دائماً", "الثاني يحتاج إنترنت", "لا فرق بينهما"], why: "في الخاضع للإشراف لكل مثال تسمية (Label) صحيحة." },
+      { q: "أي مما يلي يُعد هجوم تصيّد (Phishing)؟", o: ["رسالة مزيفة تنتحل جهة موثوقة لسرقة بياناتك", "تحديث رسمي للنظام", "نسخة احتياطية للملفات", "تشفير قرص التخزين"], why: "التصيّد يخدعك لتكتب بياناتك في موقع أو رسالة مزيفة." }
+    ],
+    [
+      { q: "ما ناتج هذه العملية المنطقية؟  (1 AND 0) OR (NOT 0)", o: ["1", "0", "خطأ", "لا يمكن تحديده"], why: "1 AND 0 = 0، وNOT 0 = 1، ثم 0 OR 1 = 1." },
+      { q: "كم قيمة مختلفة يمكن تمثيلها بـ 4 بت؟", o: ["16", "8", "4", "32"], why: "عدد القيم = 2 أس 4 = 16." },
+      { q: "ما الهدف من تقسيم البيانات إلى تدريب واختبار في تعلم الآلة؟", o: ["قياس أداء النموذج على بيانات لم يرها", "تقليل حجم الملف", "تسريع الإنترنت", "تشفير البيانات"], why: "الاختبار على بيانات جديدة يعطي تقييماً حقيقياً للدقة." }
+    ]
+  ];
+  var $ = function (id) { return document.getElementById(id); };
+  var level, lives, score, used, locked, current;
+
+  function shuffle(a) {
+    var b = a.slice();
+    for (var i = b.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = b[i]; b[i] = b[j]; b[j] = t;
+    }
+    return b;
+  }
+
+  function draw() {
+    var bar = $("ch-bar");
+    bar.innerHTML = "";
+    for (var i = 0; i < LEVELS.length; i++) {
+      var s = document.createElement("div");
+      s.className = "ch-seg" + (i < level ? " done" : (i === level ? " now" : ""));
+      bar.appendChild(s);
+    }
+    $("ch-lv").textContent = String(level + 1);
+    $("ch-pts").textContent = String(score);
+    var h = "";
+    for (var k = 0; k < 3; k++) { h += (k < lives ? "❤️" : "🖤"); }
+    $("ch-hearts").textContent = h;
+  }
+
+  function start() {
+    level = 0; lives = 3; score = 0; used = {};
+    $("ch-end").hidden = true;
+    $("ch-game").hidden = false;
+    show();
+  }
+
+  function pick() {
+    var pool = LEVELS[level];
+    var free = [];
+    for (var i = 0; i < pool.length; i++) { if (!used[level + "-" + i]) { free.push(i); } }
+    if (free.length === 0) { used = {}; for (var j = 0; j < pool.length; j++) { free.push(j); } }
+    var idx = free[Math.floor(Math.random() * free.length)];
+    used[level + "-" + idx] = true;
+    return pool[idx];
+  }
+
+  function show() {
+    draw();
+    locked = false;
+    current = pick();
+    $("ch-q").textContent = current.q;
+    $("ch-fb").hidden = true;
+    $("ch-next").hidden = true;
+    var box = $("ch-opts");
+    box.innerHTML = "";
+    var opts = current.o.map(function (t, i) { return { t: t, ok: i === 0 }; });
+    shuffle(opts).forEach(function (op) {
+      var b = document.createElement("button");
+      b.textContent = op.t;
+      b.onclick = function () { answer(b, op.ok); };
+      box.appendChild(b);
+    });
+  }
+  function answer(btn, ok) {
+    if (locked) { return; }
+    locked = true;
+    var all = $("ch-opts").children;
+    for (var i = 0; i < all.length; i++) {
+      all[i].disabled = true;
+      if (all[i].textContent === current.o[0]) { all[i].classList.add("right"); }
+    }
+    var fb = $("ch-fb");
+    if (ok) {
+      score += 10 * (level + 1);
+      fb.className = "good";
+      fb.textContent = "✅ صح! " + current.why;
+    } else {
+      btn.classList.add("wrong");
+      lives--;
+      fb.className = "bad";
+      fb.textContent = "❌ غلط. " + current.why;
+    }
+    fb.hidden = false;
+    $("ch-pts").textContent = String(score);
+    var h = "";
+    for (var k = 0; k < 3; k++) { h += (k < lives ? "❤️" : "🖤"); }
+    $("ch-hearts").textContent = h;
+    $("ch-next").textContent = "التالي ⬅️";
+    $("ch-next").hidden = false;
+    $("ch-next").onclick = function () { afterAnswer(ok); };
+  }
+
+  function afterAnswer(ok) {
+    if (ok) {
+      level++;
+      if (level >= LEVELS.length) { return finish(true); }
+    } else if (lives <= 0) {
+      return finish(false);
+    }
+    show();
+  }
+
+  function finish(won) {
+    $("ch-game").hidden = true;
+    $("ch-end").hidden = false;
+    var reached = won ? LEVELS.length : level + 1;
+    $("ch-title").textContent = won ? "🥇 مبروك! خلصت كل المستويات" : "💔 خلصت القلوب";
+    $("ch-final").textContent = "وصلت للمستوى " + reached + " من " + LEVELS.length + " وجمعت " + score + " نقطة.";
+    var best = 0;
+    try { best = parseInt(localStorage.getItem("lab_best_score"), 10); } catch (e) { best = 0; }
+    if (isNaN(best)) { best = 0; }
+    if (score > best) {
+      best = score;
+      try { localStorage.setItem("lab_best_score", String(best)); } catch (e2) {}
+      $("ch-best").textContent = "🎉 ده أعلى رقم ليك لحد دلوقتي!";
+    } else {
+      $("ch-best").textContent = "أعلى رقم ليك: " + best + " نقطة.";
+    }
+    $("ch-bar").innerHTML = "";
+  }
+
+  $("ch-again").onclick = start;
+  start();
+})();
+</script>
+        <footer>
+            AI LAB | Explore. Learn. Think.
+        </footer>
+
+    </main>
+    <script src="./js/nav.js"></script>
+<script src="./js/nova-chat.js"></script>
+</body>
+</html>

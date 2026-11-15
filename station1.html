@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Lab | المحطة 1: علّمني</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        html, body { margin: 0; min-height: 100vh; background: #0a1128; }
+        body { background: linear-gradient(180deg, #0a1128 0%, #0f1d40 50%, #1e3a8a 100%) fixed !important; }
+
+        #ak { max-width: 900px; margin: 20px auto 40px; padding: 20px 16px; color: #fff; direction: rtl; text-align: center;
+              font-family: 'Segoe UI', Tahoma, sans-serif; line-height: 1.8; }
+        #ak h2 { font-size: 32px; margin: 0 0 4px; }
+        .ak-sub { color: #7dd3fc; font-size: 17px; margin-bottom: 8px; }
+        #ak-mem { color: #a5b4fc; font-size: 13px; min-height: 20px; }
+
+        #ak-bot { width: 140px; height: 140px; margin: 6px auto; border-radius: 50%; font-size: 76px; line-height: 140px; }
+        #ak-bot.think { animation: akp 1s infinite alternate; }
+        @keyframes akp { from { box-shadow: 0 0 0 0 #8b5cf6aa; } to { box-shadow: 0 0 0 18px #8b5cf600; } }
+
+        #ak-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 14px 0; }
+        .ak-chip { background: #1e2a55; color: #fff; border: 1px solid #6d28d9; border-radius: 20px; padding: 5px 14px; font-size: 13px; cursor: pointer; font-family: inherit; }
+        .ak-chip:hover { background: #6d28d9; }
+
+        #ak-log { max-width: 700px; margin: 10px auto; display: flex; flex-direction: column; gap: 8px; max-height: 380px; overflow-y: auto; text-align: right; }
+        .ak-m { padding: 10px 14px; border-radius: 12px; max-width: 90%; font-size: 15px; white-space: pre-wrap; }
+        .ak-m.bot { background: #1e2a55; align-self: flex-start; border-right: 3px solid #00d9ff; }
+        .ak-m.me { background: #3b82f6; align-self: flex-end; }
+        .ak-m.err { background: #4a1d2b; color: #ffb3c1; align-self: flex-start; }
+        .ak-tag { font-size: 12px; margin-top: 6px; color: #fcd34d; }
+
+        #ak-actions { max-width: 700px; margin: 8px auto; }
+        #ak-check { display: block; width: 100%; padding: 14px; border: none; border-radius: 12px; background: #059669; color: #fff;
+                    font-size: 18px; font-weight: bold; cursor: pointer; font-family: inherit; box-shadow: 0 0 18px #05966966; }
+        #ak-check:hover { filter: brightness(1.12); }
+        #ak-links { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+        #ak-links a { color: #93c5fd; border: 1px solid #3b82f6; border-radius: 20px; padding: 3px 14px; font-size: 14px; text-decoration: none; }
+        #ak-links a:hover { background: #1e2a55; }
+
+        #ak-input { max-width: 700px; margin: 14px auto 0; display: flex; gap: 8px; align-items: stretch; }
+        #ak-q { flex: 1; min-width: 0; box-sizing: border-box; padding: 12px; border-radius: 10px; border: 1px solid #3b82f6; background: #0f1d40; color: #fff; font-size: 16px; font-family: inherit; resize: none; }
+        #ak-send { padding: 0 22px; border: none; border-radius: 10px; background: #8b5cf6; color: #fff; font-size: 16px; cursor: pointer; font-family: inherit; }
+        #ak-send:disabled { opacity: .4; cursor: not-allowed; }
+
+        #ak-how { background: #16224a; border-radius: 10px; padding: 10px 14px; margin: 22px auto 0; max-width: 640px; font-size: 14px; text-align: right; }
+        #ak-how ol { margin: 6px 0 0; padding-right: 20px; }
+    </style>
+</head>
+
+<body>
+
+    <section id="ak">
+        <h2>محطة: علّمني</h2>
+        <p class="ak-sub">اكتب سؤالك عن الحاسب الآلي، ونوفا هتجاوبك في ثواني.</p>
+        <div id="ak-mem"></div>
+
+        <div id="ak-bot"> 🤖 </div><br><br>
+
+        <div id="ak-chips">
+            <button class="ak-chip">يعني إيه RAM وإيه الفرق بينها وبين الـ SSD؟</button>
+            <button class="ak-chip">إيه الفرق بين نظام التشغيل والتطبيق؟</button>
+            <button class="ak-chip">إزاي الإنترنت بيوصّل الصفحة لجهازي؟</button>
+            <button class="ak-chip">يعني إيه خوارزمية؟</button>
+        </div>
+
+        <div id="ak-log"></div>
+
+        <div id="ak-actions" hidden>
+            <button id="ak-check">✅ تأكد من الإجابة</button>
+            <div id="ak-links">
+                <a id="ak-g" target="_blank" rel="noopener">🔎 ابحث في جوجل</a>
+                <a id="ak-w" target="_blank" rel="noopener">🌐 ابحث في ويكيبيديا</a>
+            </div>
+        </div>
+
+        <div id="ak-input">
+            <textarea id="ak-q" rows="2" placeholder="اكتب سؤالك هنا..."></textarea>
+            <button id="ak-send">إرسال</button>
+        </div>
+
+        <div id="ak-how">
+            <b>إزاي تستخدم المحطة؟</b>
+            <ol>
+                <li>اكتب سؤالك عن الحاسب الآلي واستنى إجابة نوفا.</li>
+                <li>ابحث عن الإجابة بره الموقع (جوجل / ويكيبيديا / كتاب).</li>
+                <li>دوس «تأكد من الإجابة» وقول لنوفا هي صح ولا غلط.</li>
+            </ol>
+        </div>
+    </section>
+
+    <script src="./js/nav.js"></script>
+    <script src="./js/nova-brain.js"></script>
+
+    <script>
+    (function () {
+        var $ = function (id) { return document.getElementById(id); };
+        var B = window.NovaBrain;
+        var history = [], busy = false;
+
+        // شكل نوفا (لما nova-avatar.js يحمّل)
+        var tries = 0;
+        (function putAvatar() {
+            if (window.novaAvatar) {
+                $("ak-bot").setAttribute("data-na", "1");
+                $("ak-bot").style.fontSize = "0";
+                $("ak-bot").innerHTML = window.novaAvatar(140);
+            } else if (++tries < 40) { setTimeout(putAvatar, 250); }
+        })();
+
+        function memText() {
+            var n = B.count();
+            $("ak-mem").textContent = n ? "📚 نوفا حافظة " + n + " إجابة مؤكدة في ذاكرة المختبر" : "";
+        }
+        memText();
+
+        function add(text, cls) {
+            var d = document.createElement("div");
+            d.className = "ak-m " + cls;
+            d.textContent = text;
+            $("ak-log").appendChild(d);
+            $("ak-log").scrollTop = $("ak-log").scrollHeight;
+            return d;
+        }
+        function tag(bubble, r) {
+            var t = document.createElement("div");
+            t.className = "ak-tag";
+            t.textContent = r.source === "memory"
+                ? (r.kind === "fixed" ? "📚 إجابة محدّثة من ذاكرة المختبر" : "📚 إجابة مؤكدة من ذاكرة المختبر")
+                : "🤖 إجابة جديدة من نوفا — لسه محتاجة تأكيد";
+            bubble.appendChild(t);
+        }
+
+        async function send(text) {
+            var q = (text || $("ak-q").value).trim();
+            if (!q || busy) { return; }
+            busy = true;
+            $("ak-send").disabled = true;
+            $("ak-q").value = "";
+            $("ak-actions").hidden = true;
+            add(q, "me");
+            var bubble = add("...", "bot");
+            $("ak-bot").classList.add("think");
+            history.push({ role: "user", parts: [{ text: q }] });
+            try {
+                var r = await B.answer(q, history, function (t) {
+                    bubble.textContent = B.clean(t);
+                    $("ak-log").scrollTop = $("ak-log").scrollHeight;
+                });
+                var a = B.clean(r.text).trim();
+                bubble.textContent = a;
+                tag(bubble, r);
+                history.push({ role: "model", parts: [{ text: a }] });
+                B.setLast(q, a, r.source);
+                $("ak-g").href = "https://www.google.com/search?q=" + encodeURIComponent(q);
+                $("ak-w").href = "https://ar.wikipedia.org/w/index.php?search=" + encodeURIComponent(q);
+                $("ak-actions").hidden = false;
+                } catch (e) {
+                history.pop();
+                bubble.className = "ak-m err";
+                bubble.textContent = B.friendly(e);
+            }
+            $("ak-bot").classList.remove("think");
+            busy = false;
+            $("ak-send").disabled = false;
+            $("ak-q").focus();
+        }
+
+        $("ak-send").onclick = function () { send(); };
+        $("ak-q").addEventListener("keydown", function (e) {
+            if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+        });
+        document.querySelectorAll(".ak-chip").forEach(function (b) {
+            b.onclick = function () { send(b.textContent); };
+        });
+        $("ak-check").onclick = function () { location.href = "station2.html"; };
+
+        add("أهلاً! أنا نوفا. اكتب أي سؤال عن الحاسب الآلي، أو اختار سؤال من اللي فوق.", "bot");
+
+        // لو جاي من محطة 2 عشان يجرّب نفس السؤال تاني
+        try {
+            var pre = new URLSearchParams(location.search).get("q");
+            if (pre) { window.history.replaceState(null, "", "station1.html"); send(pre); }
+        } catch (e) {}
+    })();
+    </script>
+</body>
+</html>

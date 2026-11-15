@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Lab | المحطة 2: هل أنت متأكد؟</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <style>
+        html, body { margin: 0; min-height: 100vh; background: #0a1128; }
+        body { background: linear-gradient(180deg, #0a1128 0%, #0f1d40 50%, #1e3a8a 100%) fixed !important; }
+
+        #vf { max-width: 900px; margin: 20px auto 40px; padding: 20px 16px; color: #fff; direction: rtl; text-align: center;
+              font-family: 'Segoe UI', Tahoma, sans-serif; line-height: 1.8; }
+        #vf h2 { font-size: 32px; margin: 0 0 4px; }
+        #vf-bot { width: 130px; height: 130px; margin: 6px auto; border-radius: 50%; font-size: 70px; line-height: 130px; }
+        #vf-bot.think { animation: vfp 1s infinite alternate; }
+        @keyframes vfp { from { box-shadow: 0 0 0 0 #8b5cf6aa; } to { box-shadow: 0 0 0 18px #8b5cf600; } }
+
+        .vf-wrap { max-width: 700px; margin: 12px auto; text-align: right; }
+        .vf-ask { background: #1e2a55; border-right: 3px solid #00d9ff; border-radius: 12px; padding: 12px 16px; font-size: 18px; text-align: center; margin: 10px auto 16px; max-width: 700px; }
+        .vf-label { font-weight: bold; color: #93c5fd; margin: 10px 0 4px; }
+        .vf-box { background: #16224a; border-radius: 12px; padding: 12px 14px; white-space: pre-wrap; font-size: 15px; }
+        .vf-btns { display: flex; gap: 10px; margin: 10px 0; }
+        .vf-btns button { flex: 1; padding: 12px 10px; border: 2px solid transparent; border-radius: 12px; color: #fff; font-size: 16px; cursor: pointer; font-family: inherit; }
+        #vf-ok { background: #059669; } #vf-bad { background: #dc2626; } #vf-part { background: #d97706; }
+        .vf-btns button:hover { filter: brightness(1.12); }
+        .vf-btns button:disabled { opacity: .35; cursor: not-allowed; }
+        .vf-btns button.sel { border-color: #fcd34d; }
+
+        #vf-note { width: 100%; box-sizing: border-box; padding: 10px; border-radius: 10px; border: 1px solid #3b82f6; background: #0f1d40; color: #fff; font-size: 16px; font-family: inherit; }
+        .vf-send { width: 100%; margin-top: 8px; padding: 12px; border: none; border-radius: 10px; background: #8b5cf6; color: #fff; font-size: 16px; cursor: pointer; font-family: inherit; }
+        .vf-send:disabled { opacity: .4; cursor: not-allowed; }
+
+        .vf-reply { background: #1e2a55; border-right: 3px solid #00d9ff; border-radius: 12px; padding: 12px 16px; white-space: pre-wrap; }
+        .vf-reply.err { background: #4a1d2b; color: #ffb3c1; border-color: #ef4444; }
+        .vf-final { background: #064e3b; border-radius: 12px; padding: 12px 16px; margin-top: 10px; white-space: pre-wrap; }
+        .vf-saved { color: #fcd34d; font-size: 14px; margin-top: 10px; }
+        .vf-links { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+        .vf-links a { flex: 1; min-width: 200px; padding: 12px; text-align: center; border-radius: 10px; color: #fff; text-decoration: none; font-weight: bold; background: #3b82f6; }
+        .vf-links a.green { background: #059669; }
+        #vf-empty { background: #16224a; border-radius: 12px; padding: 16px; }
+        #vf-empty a { color: #93c5fd; }
+        #vf-mem { color: #a5b4fc; font-size: 13px; margin-top: 22px; }
+        #vf-clear { background: none; border: none; color: #fca5a5; cursor: pointer; font-family: inherit; font-size: 13px; text-decoration: underline; }
+    </style>
+</head>
+
+<body>
+
+    <section id="vf">
+        <h2>محطة: هل أنت متأكد؟</h2>
+        <div id="vf-bot">🤖</div>
+
+        <div id="vf-empty" class="vf-wrap" hidden>
+            لسه ماسألتش نوفا أي سؤال. <a href="station1.html">روح لمحطة «علّمني»</a> واسأل الأول.
+        </div>
+
+        <div id="vf-main" hidden>
+            <div class="vf-ask">راجعت إجابتي بره الموقع؟ 🔍<br>قولي بصراحة: <b>هل أنا صح؟</b> 🤔</div>
+            <div class="vf-wrap">
+                <div class="vf-label">❓ سؤالك:</div>
+                <div class="vf-box" id="vf-q"></div>
+                <div class="vf-label">🤖 إجابتي:</div>
+                <div class="vf-box" id="vf-a"></div>
+
+                <div class="vf-label">رأيك بعد ما بحثت:</div>
+                <div class="vf-btns">
+                    <button id="vf-ok">✅ صح</button>
+                    <button id="vf-part">⚠️ ناقصة</button>
+                    <button id="vf-bad">❌ غلط</button>
+                </div>
+
+                <div id="vf-more" hidden>
+                    <textarea id="vf-note" rows="3" placeholder="اكتب الصح أو المصدر اللي لقيته بره الموقع (اختياري)... مثال: ويكيبيديا بتقول إن..."></textarea>
+                    <button class="vf-send" id="vf-send">✉️ ابعت لنوفا</button>
+                </div>
+
+                <div id="vf-result" hidden>
+                    <div class="vf-reply" id="vf-reply"></div>
+                    <div class="vf-final" id="vf-final" hidden></div>
+                    <div class="vf-saved" id="vf-saved"></div>
+                    <div class="vf-links">
+                        <a id="vf-again" class="green">🔁 اسأل نوفا نفس السؤال تاني</a>
+                        <a href="station1.html">💬 سؤال جديد</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="vf-mem"></div>
+    </section>
+
+    <script src="./js/nav.js"></script>
+    <script src="./js/nova-brain.js"></script>
+
+    <script>
+    (function () {
+        var $ = function (id) { return document.getElementById(id); };
+        var B = window.NovaBrain;
+        var last = B.getLast(), busy = false, choice = "";
+
+        var tries = 0;
+        (function putAvatar() {
+            if (window.novaAvatar) {
+                $("vf-bot").setAttribute("data-na", "1");
+                $("vf-bot").style.fontSize = "0";
+                $("vf-bot").innerHTML = window.novaAvatar(130);
+            } else if (++tries < 40) { setTimeout(putAvatar, 250); }
+        })();
+
+        function memText() {
+            var n = B.count();
+            $("vf-mem").innerHTML = n
+                ? "📚 ذاكرة المختبر فيها " + n + " إجابة مؤكدة. <button id=\"vf-clear\">امسح الذاكرة</button>"
+                : "";
+            if ($("vf-clear")) {
+                $("vf-clear").onclick = function () {
+                    if (confirm("متأكد إنك عايز تمسح كل الإجابات المحفوظة؟")) { B.clear(); memText(); }
+                };
+            }
+        }
+        memText();
+
+        if (!last) { $("vf-empty").hidden = false; return; }
+
+        $("vf-main").hidden = false;
+        $("vf-q").textContent = last.q;
+        $("vf-a").textContent = last.a;
+        $("vf-again").href = "station1.html?q=" + encodeURIComponent(last.q);
+
+        function lock() {
+            ["vf-ok", "vf-part", "vf-bad"].forEach(function (id) { $(id).disabled = true; });
+            $("vf-send").disabled = true;
+            $("vf-note").disabled = true;
+        }
+        function showResult(msg, isErr) {
+            $("vf-result").hidden = false;
+            $("vf-reply").className = "vf-reply" + (isErr ? " err" : "");
+            $("vf-reply").textContent = msg;
+        }
+
+        // ✅ صح: شكر فوري + حفظ الإجابة كمؤكدة
+        $("vf-ok").onclick = function () {
+            if (busy) { return; }
+            lock();
+            $("vf-ok").classList.add("sel");
+            B.learn(last.q, last.a, "ok");
+            $("vf-more").hidden = true;
+            showResult("تمام! 🎉 شكراً إنك أكدت إجابتي. تأكيدك ده بيخلّي الموقع يتطوّر: الإجابة اتحفظت في ذاكرة المختبر كإجابة موثوقة، ولما حد يسألني نفس السؤال تاني هجاوب بيها فوراً.");
+            $("vf-saved").textContent = "💾 اتحفظت كإجابة مؤكدة";
+            memText();
+        };
+
+        // ❌ غلط / ⚠️ ناقصة: تظهر خانة الملاحظة
+        function pick(kind, btnId) {
+            if (busy) { return; }
+            choice = kind;
+            ["vf-ok", "vf-part", "vf-bad"].forEach(function (id) { $(id).classList.remove("sel"); });
+            $(btnId).classList.add("sel");
+            $("vf-more").hidden = false;
+            $("vf-note").focus();
+        }
+        $("vf-bad").onclick = function () { pick("الإجابة فيها غلط", "vf-bad"); };
+        $("vf-part").onclick = function () { pick("الإجابة ناقصة", "vf-part"); };
+
+        $("vf-send").onclick = async function () {
+            if (!choice || busy) { return; }
+            busy = true;
+            $("vf-send").disabled = true;
+            $("vf-bot").classList.add("think");
+            showResult("نوفا بتراجع إجابتها...");
+            $("vf-final").hidden = true;
+            $("vf-saved").textContent = "";
+            try {
+                var raw = await B.evaluate(last.q, last.a, choice, $("vf-note").value.trim(), function (t) {
+                    var p = B.parseEval(t);
+                    if (p.msg) { $("vf-reply").textContent = B.clean(p.msg); }
+                });
+                var p = B.parseEval(raw);
+                if (!p.verdict || !p.msg) {
+                    showResult(B.clean(raw).trim());
+                } else {
+                    var lead = p.verdict === "STUDENT_WRONG" ? "" : "شكراً إنك صحّحتني! 🙏 ";
+                    showResult(lead + B.clean(p.msg));
+                    if (p.verdict !== "STUDENT_WRONG" && p.fin) {
+                        var fin = B.clean(p.fin).trim();
+                        $("vf-final").hidden = false;
+                        $("vf-final").textContent = "✅ الإجابة المحدّثة:\n" + fin;
+                        B.learn(last.q, fin, "fixed");
+                        $("vf-saved").textContent = "💾 الإجابة دي هتتطوّر وتتحفظ في ذاكرة المختبر، ولما حد يسألني نفس السؤال تاني هجاوب بالإجابة الصح.";
+                    } else {
+                        B.learn(last.q, last.a, "ok");
+                        $("vf-saved").textContent = "💾 راجعت إجابتي وطلعت صح، فاتحفظت كإجابة مؤكدة.";
+                    }
+                    memText();
+                }
+            } catch (e) {
+                showResult(B.friendly(e), true);
+                $("vf-send").disabled = false;
+            }
+            $("vf-bot").classList.remove("think");
+            busy = false;
+        };
+    })();
+    </script>
+</body>
+</html>
